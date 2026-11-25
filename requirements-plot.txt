@@ -1,0 +1,4 @@
+# Optional dependency for the independent plotting companion only.
+# The calculation core exp01_pell_stability.py uses no third-party packages.
+# Install with:  py -m pip install -r requirements-plot.txt
+matplotlib>=3.5
