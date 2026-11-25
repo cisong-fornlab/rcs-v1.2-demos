@@ -294,7 +294,9 @@ def denominator_stability_certificate(k: int) -> dict:
     """Return the tighter, model-specific threshold from actual denominators.
 
     Choose the least j >= 0 such that q_(2j) * q_(2j+1) > k. The
-    associated interval width is then strictly less than 1/k.
+    associated interval width is then strictly less than 1/k. This j is
+    minimal relative to the full interval I_j width criterion only; it is
+    not a globally optimal tail threshold.
     """
     if k <= 0:
         raise ValueError("precision k must be positive")
@@ -423,18 +425,24 @@ def build_report(max_index: int, precisions: list[int]) -> tuple[str, dict[str, 
         "For EVERY positive integer k, let j be the least nonnegative integer",
         "with 2^(4*j+1)>k, and set N(k)=2*j. For ALL m,n >= N(k),",
         "|x_m-x_n| <= diam(I_j) <= 1/2^(4*j+1) < 1/k.",
-        "This proves RCS-4 (13) for the Pell model using Theorem 5.2.",
-        "The following requested thresholds illustrate the uniform argument.",
+        "The nested intervals I_j are nonempty, refinement-coherent, nested,",
+        "and diam(I_j) -> 0, so they satisfy the premises of Theorem 5.2;",
+        "its enclosure criterion establishes RCS-4 (13) for this Pell model",
+        "(cofinal restriction in part (c) is indexed by j -> 2j).",
+        "The following requested thresholds make this argument explicit.",
         tables["pell_certificates.csv"].rstrip(),
         "The next table reports the tighter, model-specific actual-denominator bound.",
-        "It is separate from the general power-of-two certificate above.",
+        "It is separate from the general power-of-two certificate above. The",
+        "least j reported here is minimal relative to the full interval I_j",
+        "width criterion only; it is not a globally optimal tail threshold.",
         tables["pell_denominator_certificates.csv"].rstrip(),
         "Thresholds are analytical and may exceed the displayed prefix.",
         "",
         "L4 | Conclusion and scope",
-        "The nested enclosure certificate (Theorem 5.2) establishes RCS-4 (13)",
-        "for this Pell model; Theorem 4.2 then maps the stable equivalence",
-        "class to its unique completion value x.",
+        "The enclosure intervals I_j meet the premises of Theorem 5.2",
+        "(nonempty, nested, diam -> 0), so its criterion establishes RCS-4",
+        "(13) for this Pell model; Theorem 4.2 then maps the stable",
+        "equivalence class to its unique completion value x.",
         "I_0=[1,3/2] ensures x>=1, hence x>0.",
         "By (57), |x_n^2-2|=1/q_n^2<=1/4^n -> 0.",
         "Continuity of multiplication in the completion gives x^2=2 (51).",

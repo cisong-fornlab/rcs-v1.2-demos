@@ -5,12 +5,14 @@ These tests exercise the calculation core only. They use fixed small depths
 and the exact-arithmetic rules of the v1.2 spec: int and fractions.Fraction,
 no floating point in a verification path.
 
-Run from the exp01 directory:
+Run from the repository root directory:
 
-    python -m tests.test_exp01
+    python -m unittest discover -s tests -v
 
-Exit code 0 means every finite check and certificate bound held; a non-zero
-exit code means an expected relation failed.
+The test file also runs directly as ``python tests/test_exp01.py``; a
+``sys.path`` entry for the repository root is installed below so either form
+works. Exit code 0 means every finite check and certificate bound held; a
+non-zero exit code means an expected relation failed.
 """
 
 from __future__ import annotations
@@ -20,7 +22,8 @@ import unittest
 from fractions import Fraction
 from pathlib import Path
 
-# Allow running both as ``python -m tests.test_exp01`` and ``python tests/test_exp01.py``.
+# Allow running either ``python -m unittest discover -s tests`` or the test
+# file directly as ``python tests/test_exp01.py``.
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 

@@ -175,10 +175,10 @@ py .\exp01\plot_exp01.py --stage-csv .\results\exp01\pell_stages.csv --interval-
 ### 5.5 运行测试
 
 ```powershell
-py -m unittest tests.test_exp01 -v
+py -m unittest discover -s tests -v
 ```
 
-退出码 0 表示每个有限核验和证书界都成立；非零退出码表示某个预期关系失败。
+退出码 0 表示每个有限核验和证书界都成立；非零退出码表示某个预期关系失败。测试文件也可直接执行 `py tests\test_exp01.py`，脚本内会把仓库根目录加入模块搜索路径。
 
 ## 6. 命令参数
 
@@ -243,11 +243,16 @@ py -m unittest tests.test_exp01 -v
 | 嵌套区间 | (55) | `verify_intervals` | `pell_intervals.csv` |
 | 平方残差 | (57) | `verify_stages` | `pell_stages.csv` |
 | RCS-4 稳定性 | (13) | `stability_certificate`、`denominator_stability_certificate` | 两张证书 CSV |
-| 包络稳定性 | Thm. 5.2 | 嵌套区间证书 | 报告 L3–L4 |
+| 包络稳定性 | Thm. 5.2 | 成对区间 $I_j$ 非空、嵌套、直径趋零，满足定理 5.2 前提；(c) 共尾限制由子列 $j\mapsto 2j$ 给出 | 报告 L3–L4 |
 | 完备化映射 | Thm. 4.2 | 完成值符号标识 | 报告 L4 |
 
 定性基底的程序核验最多抽样到内部深度 8；所有阶段的一般结论来自报告
 L3 中的恒等式和后继论证，而不是把有限样本当作一般证明。
+
+需要说明：原文 Proposition 7.1 的证明只写 $\operatorname{diam}I_j\to0$、
+由定理 5.2 推出 RCS-4，未显式给出 $N(k)=2j$ 的阈值公式，也没有独立的
+实际分母乘积证书。通用幂次阈值与实际分母阈值两张 CSV 是本实验对原文
+证明的计算化补充，报告已将二者分开，不冒充原文定理结论。
 
 ## 9. 两类稳定性证书不得混用
 
@@ -296,7 +301,8 @@ $$
 
 该模型专属证书由 `denominator_stability_certificate` 生成，写入
 `pell_denominator_certificates.csv`。它使用实际分母，通常比幂次上界更紧，
-但不能与通用幂次界混为同一个估计。
+但不能与通用幂次界混为同一个估计。这里的“最小 $j$”仅相对于完整区间
+$I_j$ 的宽度准则而言，不是所有可能尾部比较下的全局最优阈值。
 
 默认参数的核验值为：
 
@@ -328,7 +334,7 @@ $$
 ### 自动验收测试
 
 ```powershell
-py -m unittest tests.test_exp01 -v
+py -m unittest discover -s tests -v
 ```
 
 测试只跑计算核心，使用固定小深度和精确算术规则；不涉及浮点核验路径。
@@ -392,4 +398,3 @@ py -O .\exp01\exp01_pell_stability.py --max-index 2 --precision 2 --output-dir .
 | 独立复核者与日期 | 待填写 |
 | Windows 复跑版本记录 | 本机 2026-11-25：Python 3.15.2，matplotlib 3.11.2；第二台干净目录待复跑 |
 | Zenodo DOI | 待填写 |
-#（注：内容由AI生成）
