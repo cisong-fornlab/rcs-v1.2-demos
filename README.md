@@ -6,18 +6,18 @@
 
 ## 实验清单
 
-|  编号   |             演示             | 脚本目录  |  状态  |
-| ------ | ---------------------------- | -------- | ------ |
-| EXP-01 | Pell 稳定线程与无理完备化值    | `exp01/` | 已完成 |
-| EXP-02 | 振荡反例与 RCS-4 独立性       | `exp02/` | 待实现 |
-| EXP-03 | 共尾细化不变性及非共尾对照     | `exp03/` | 待实现 |
-| EXP-04 | 有限计数扰动鲁棒性            | `exp04/` | 待实现 |
-| EXP-05 | 嵌套有理包络证书              | `exp05/` | 待实现 |
-| EXP-06 | 准入谱非唯一性                | `exp06/` | 待实现 |
-| EXP-07 | 去掉有界性后的反例            | `exp07/` | 待实现 |
-| EXP-08 | 区间缩宽但任意选值不稳定       | `exp08/` | 待实现 |
-| EXP-09 | 给定证书不嵌套但任意选值仍稳定 | `exp09/` | 待实现 |
-| EXP-10 | 稳定历史的分类与渐近等价       | `exp10/` | 待实现 |
+|  编号   |             演示             |           脚本目录           |  状态  |
+| ------ | ---------------------------- | --------------------------- | ------ |
+| EXP-01 | Pell 稳定线程与无理完备化值    | [`exp01/`](exp01/README.md) | 已完成 |
+| EXP-02 | 振荡反例与 RCS-4 独立性       | [`exp02/`](exp02/README.md) | 已完成 |
+| EXP-03 | 共尾细化不变性及非共尾对照     | `exp03/`                    | 待实现 |
+| EXP-04 | 有限计数扰动鲁棒性            | `exp04/`                    | 待实现 |
+| EXP-05 | 嵌套有理包络证书              | `exp05/`                    | 待实现 |
+| EXP-06 | 准入谱非唯一性                | `exp06/`                    | 待实现 |
+| EXP-07 | 去掉有界性后的反例            | `exp07/`                    | 待实现 |
+| EXP-08 | 区间缩宽但任意选值不稳定       | `exp08/`                    | 待实现 |
+| EXP-09 | 给定证书不嵌套但任意选值仍稳定 | `exp09/`                    | 待实现 |
+| EXP-10 | 稳定历史的分类与渐近等价       | `exp10/`                    | 待实现 |
 
 EXP-01 至 EXP-09 为发布承诺；EXP-10 验收通过后随 v1.2 发布。
 
@@ -30,15 +30,19 @@ EXP-01 至 EXP-09 为发布承诺；EXP-10 验收通过后随 v1.2 发布。
 ├── run_all.py                 # 批量入口：顺序运行各实验并汇总验收状态
 ├── tests/
 │   ├── __init__.py
-│   └── test_exp01.py
-└── exp01/
-    ├── exp01_pell_stability.py
-    ├── plot_exp01.py
+│   ├── test_exp01.py
+│   └── test_exp02.py
+├── exp01/
+│   ├── exp01_pell_stability.py
+│   ├── plot_exp01.py
+│   └── README.md
+└── exp02/
+    ├── exp02_oscillatory_countermodel.py
+    ├── plot_exp02.py
     └── README.md
 ```
 
-每个实验脚本自包含其必要定义、递推与证书，可独立运行，不依赖其他实验的
-输出文件。生成物（CSV、PNG、报告）写入 `results/`，不纳入版本控制。
+每个实验的主计算脚本自包含所需定义、递推与证书，可独立运行。绘图读取已生成的 CSV，并列图使用 EXP-01 和 EXP-02 两份阶段 CSV。生成物（CSV、PNG、报告）写入 `results/`，不纳入版本控制。
 
 ## 运行环境
 
@@ -57,10 +61,30 @@ py -m pip install -r requirements-plot.txt
 py .\exp01\exp01_pell_stability.py --max-index 30 --precision 2 --precision 10 --precision 100 --output-dir .\results\exp01
 ```
 
+### 运行 EXP-02 主计算
+
+```powershell
+py .\exp02\exp02_oscillatory_countermodel.py --max-index 10 --witness-index 0 --output-dir .\results\exp02
+```
+
+预期同时输出 `RCS-4: False` 和 `EXP-02 acceptance: PASS`。任意阈值见证、精确 CSV 和退出码见 [EXP-02 说明](exp02/README.md)。
+
 ### 独立绘图
+
+运行相应的主计算命令后，可生成 EXP-01 图或 EXP-02 单图。
 
 ```powershell
 py .\exp01\plot_exp01.py --stage-csv .\results\exp01\pell_stages.csv --interval-csv .\results\exp01\pell_intervals.csv --output-dir .\results\exp01\figures
+```
+
+```powershell
+py .\exp02\plot_exp02.py
+```
+
+使用两项实验生成的阶段 CSV，可在 `results/exp02/figures/` 生成 EXP-02 单图及 Pell／振荡并列图。
+
+```powershell
+py .\exp02\plot_exp02.py --exp01-csv .\results\exp01\pell_stages.csv
 ```
 
 ### 运行测试
@@ -69,11 +93,19 @@ py .\exp01\plot_exp01.py --stage-csv .\results\exp01\pell_stages.csv --interval-
 py -m unittest discover -s tests -v
 ```
 
+当前两项实验共有 32 项测试。完整执行绘图测试需安装 `matplotlib`。以下命令只运行 EXP-02 测试。
+
+```powershell
+py -m unittest discover -s tests -p test_exp02.py -v
+```
+
 ### 批量运行全部已实现实验
 
 ```powershell
 py .\run_all.py
 ```
+
+当前批量入口运行 EXP-01 和 EXP-02，预期汇总为 `passed: 2`、`skipped: 0`、`failed: 0`。
 
 ## 数学口径与边界
 

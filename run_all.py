@@ -28,6 +28,12 @@ EXPERIMENTS: list[tuple[str, Path, list[str]]] = [
         ["--max-index", "30", "--precision", "2", "--precision", "10",
          "--precision", "100", "--output-dir", "results/exp01"],
     ),
+    (
+        "EXP-02",
+        REPO_ROOT / "exp02" / "exp02_oscillatory_countermodel.py",
+        ["--max-index", "10", "--witness-index", "0",
+         "--output-dir", "results/exp02"],
+    ),
 ]
 
 
@@ -42,7 +48,7 @@ def main() -> int:
             continue
 
         cmd = [sys.executable, str(script), *args]
-        print(f"\n[RUN]  {label}: {' '.join(script.relative_to(REPO_ROOT).parts)}")
+        print(f"\n[RUN]  {label}: {script.relative_to(REPO_ROOT).as_posix()}", flush=True)
         result = subprocess.run(cmd, cwd=REPO_ROOT, check=False)
         if result.returncode == 0:
             print(f"[PASS] {label}")
