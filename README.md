@@ -1,127 +1,44 @@
 # RCS v1.2 可复现计算演示仓库
 
-本仓库承载 RCS Framework 论文 v1.2 的配套数值实验。全部计算使用 Python
-整数与 `fractions.Fraction` 精确算术；浮点只出现在独立可选绘图脚本的展示
-边界。数学依据为论文 *RCS_zenodo_v1.1*，式号、定义与定理编号以 v1.1 为准。
+本仓库提供 RCS Framework 论文 v1.2 的配套实验。式号和定理编号以 RCS v1.1 为准。计算使用整数与 `fractions.Fraction`，浮点转换仅用于绘图。
 
-## 实验清单
+## 运行
 
-|  编号   |             演示             |           脚本目录           |  状态  |
-| ------ | ---------------------------- | --------------------------- | ------ |
-| EXP-01 | Pell 稳定线程与无理完备化值    | [`exp01/`](exp01/README.md) | 已完成 |
-| EXP-02 | 振荡反例与 RCS-4 独立性       | [`exp02/`](exp02/README.md) | 已完成 |
-| EXP-03 | 共尾细化不变性及非共尾对照     | `exp03/`                    | 待实现 |
-| EXP-04 | 有限计数扰动鲁棒性            | `exp04/`                    | 待实现 |
-| EXP-05 | 嵌套有理包络证书              | `exp05/`                    | 待实现 |
-| EXP-06 | 准入谱非唯一性                | `exp06/`                    | 待实现 |
-| EXP-07 | 去掉有界性后的反例            | `exp07/`                    | 待实现 |
-| EXP-08 | 区间缩宽但任意选值不稳定       | `exp08/`                    | 待实现 |
-| EXP-09 | 给定证书不嵌套但任意选值仍稳定 | `exp09/`                    | 待实现 |
-| EXP-10 | 稳定历史的分类与渐近等价       | `exp10/`                    | 待实现 |
-
-EXP-01 至 EXP-09 为发布承诺；EXP-10 验收通过后随 v1.2 发布。
-
-## 目录结构
-
-```text
-.
-├── README.md                  # 本文件（仓库总说明）
-├── requirements-plot.txt      # 绘图可选依赖（matplotlib）
-├── run_all.py                 # 批量入口：顺序运行各实验并汇总验收状态
-├── tests/
-│   ├── __init__.py
-│   ├── test_exp01.py
-│   └── test_exp02.py
-├── exp01/
-│   ├── exp01_pell_stability.py
-│   ├── plot_exp01.py
-│   └── README.md
-└── exp02/
-    ├── exp02_oscillatory_countermodel.py
-    ├── plot_exp02.py
-    └── README.md
-```
-
-每个实验的主计算脚本自包含所需定义、递推与证书，可独立运行。绘图读取已生成的 CSV，并列图使用 EXP-01 和 EXP-02 两份阶段 CSV。生成物（CSV、PNG、报告）写入 `results/`，不纳入版本控制。
-
-## 运行环境
-
-- Python 3.10 或更高；计算核心仅依赖标准库。
-- 绘图需要 `matplotlib`（可选）：
+需要 Python 3.10 或更高版本。从仓库根目录打开 PowerShell，首次绘图前安装依赖，然后批量运行。
 
 ```powershell
 py -m pip install -r requirements-plot.txt
-```
-
-## 常用命令（Windows PowerShell，仓库根目录下）
-
-### 运行 EXP-01 主计算
-
-```powershell
-py .\exp01\exp01_pell_stability.py --max-index 30 --precision 2 --precision 10 --precision 100 --output-dir .\results\exp01
-```
-
-### 运行 EXP-02 主计算
-
-```powershell
-py .\exp02\exp02_oscillatory_countermodel.py --max-index 10 --witness-index 0 --output-dir .\results\exp02
-```
-
-预期同时输出 `RCS-4: False` 和 `EXP-02 acceptance: PASS`。任意阈值见证、精确 CSV 和退出码见 [EXP-02 说明](exp02/README.md)。
-
-### 独立绘图
-
-运行相应的主计算命令后，可生成 EXP-01 图或 EXP-02 单图。
-
-```powershell
-py .\exp01\plot_exp01.py --stage-csv .\results\exp01\pell_stages.csv --interval-csv .\results\exp01\pell_intervals.csv --output-dir .\results\exp01\figures
-```
-
-```powershell
-py .\exp02\plot_exp02.py
-```
-
-使用两项实验生成的阶段 CSV，可在 `results/exp02/figures/` 生成 EXP-02 单图及 Pell／振荡并列图。
-
-```powershell
-py .\exp02\plot_exp02.py --exp01-csv .\results\exp01\pell_stages.csv
-```
-
-### 运行测试
-
-```powershell
-py -m unittest discover -s tests -v
-```
-
-当前两项实验共有 32 项测试。完整执行绘图测试需安装 `matplotlib`。以下命令只运行 EXP-02 测试。
-
-```powershell
-py -m unittest discover -s tests -p test_exp02.py -v
-```
-
-### 批量运行全部已实现实验
-
-```powershell
 py .\run_all.py
 ```
 
-当前批量入口运行 EXP-01 和 EXP-02，预期汇总为 `passed: 2`、`skipped: 0`、`failed: 0`。
+批量入口按顺序完成计算和绘图，生成 3 份报告、9 份 CSV 和 5 张 PNG。各实验的输出在 `results/exp01/`、`results/exp02/`、`results/exp03/`，图在各自的 `figures/` 中。Pell 与振荡线程的并列图位于 `results/exp02/figures/exp01_exp02_readouts.png`。`results/` 是本地生成目录，已由 Git 忽略。
 
-## 数学口径与边界
+只生成报告和 CSV 时可用 `py .\run_all.py --no-plots`，此时所需依赖均来自 Python 标准库。Linux 或 macOS 可使用 `python3 run_all.py`。
 
-- **精确算术**：计数为整数，读数与误差为 `Fraction`；CSV 中分数为既约文本，
-  不写小数。
-- **全尾部结论**来自解析阈值证书；有限前缀计算本身不作为极限定理的证明。
-- **完成值符号化**：无理完成值以正根符号刻画及证书表示，不把浮点小数当作
-  精确完成值。
-- **反例验收**：预期失败的条件输出 `False` 与反例见证；其余核验通过时整体
-  验收状态仍为 `PASS`。
-- 各实验的结论边界、证书细节与定理—式号映射见对应实验目录下的 `README.md`。
+## 实验清单
+
+| 编号 | 演示 | 状态 |
+| --- | --- | --- |
+| EXP-01 | [Pell 稳定线程与无理完备化值](exp01/README.md) | 已实现 |
+| EXP-02 | [振荡反例与 RCS-4 独立性](exp02/README.md) | 已实现 |
+| EXP-03 | [共尾细化不变性及非共尾对照](exp03/README.md) | 已实现 |
+| EXP-04 | 有限计数扰动鲁棒性 | 待实现 |
+| EXP-05 | 嵌套有理包络证书 | 待实现 |
+| EXP-06 | 准入谱非唯一性 | 待实现 |
+| EXP-07 | 去掉有界性后的反例 | 待实现 |
+| EXP-08 | 区间缩宽但任意选值不稳定 | 待实现 |
+| EXP-09 | 给定证书不嵌套但任意选值仍稳定 | 待实现 |
+| EXP-10 | 稳定历史的分类与渐近等价 | 待实现 |
+
+EXP-01 至 EXP-09 为发布承诺。EXP-10 验收通过后随 v1.2 发布。
+
+## 验收
+
+完整批跑应显示 `passed: 3`、`skipped: 0`、`failed: 0`。单元测试用 `py -m unittest discover -s tests -v` 执行。计算报告的 L3 给出全尾部解析证书，PNG 用于展示有限前缀。已在 Linux、Python 3.12.14、Matplotlib 3.10.8 下从空结果目录验证批跑。
 
 ## 归档待办
 
-- [ ] 未参与实现的一方独立数学复核并对照 CSV；
-- [ ] Windows 干净目录复跑，记录 Python 与 matplotlib 实测版本；
-- [ ] 与论文 v1.2 式号、图号、术语最终一致性检查；
-- [ ] 冻结 GitHub 提交与 Release，代码版本与论文版本互引；
-- [ ] Zenodo 归档，补齐 DOI 与 GitHub Release 双向引用。
+- [ ] 独立数学复核并对照 CSV。
+- [ ] 在 Windows 干净目录复跑，记录 Python 与 Matplotlib 版本。
+- [ ] 核对论文 v1.2 的式号、图号和术语。
+- [ ] 固定 GitHub 提交和 Release，补齐 Zenodo DOI 与双向引用。
