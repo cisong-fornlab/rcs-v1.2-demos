@@ -492,11 +492,11 @@ class TestPlotInput(unittest.TestCase):
 
 
 class TestBatchEntry(unittest.TestCase):
-    def test_run_all_registers_exp03_and_preserves_earlier_entries(self) -> None:
+    def test_run_all_registers_exp04_and_preserves_earlier_entries(self) -> None:
         import run_all
 
         labels = [label for label, _, _ in run_all.EXPERIMENTS]
-        self.assertEqual(labels, ["EXP-01", "EXP-02", "EXP-03"])
+        self.assertEqual(labels, ["EXP-01", "EXP-02", "EXP-03", "EXP-04"])
         exp01 = run_all.EXPERIMENTS[0]
         self.assertEqual(exp01[1], run_all.REPO_ROOT / "exp01" / "exp01_pell_stability.py")
         self.assertEqual(exp01[2], ["--max-index", "30", "--precision", "2",
@@ -511,6 +511,11 @@ class TestBatchEntry(unittest.TestCase):
         self.assertEqual(exp03[2], ["--max-index", "10", "--precision", "2",
                                     "--precision", "10", "--precision", "100",
                                     "--output-dir", "results/exp03"])
+        exp04 = run_all.EXPERIMENTS[3]
+        self.assertEqual(exp04[1], run_all.REPO_ROOT / "exp04" / "exp04_count_robustness.py")
+        self.assertEqual(exp04[2], ["--max-index", "30", "--precision", "2",
+                                    "--precision", "10", "--precision", "100",
+                                    "--output-dir", "results/exp04"])
 
     def test_batch_runs_exp03_and_skips_absent_experiments(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -523,20 +528,21 @@ class TestBatchEntry(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("[SKIP] EXP-01", result.stdout)
             self.assertIn("[SKIP] EXP-02", result.stdout)
+            self.assertIn("[SKIP] EXP-04", result.stdout)
             self.assertIn("[PASS] EXP-03", result.stdout)
             self.assertEqual(result.stdout.strip().splitlines()[-3:],
-                             ["passed: 1", "skipped: 2", "failed: 0"])
+                             ["passed: 1", "skipped: 3", "failed: 0"])
             self.assertTrue((root / "results" / "exp03" / "exp03_report.txt").is_file())
             self.assertFalse((root / "results" / "exp03" / "figures").exists())
 
     @unittest.skipUnless(find_spec("matplotlib"), "optional matplotlib dependency")
     def test_default_batch_generates_all_figures_from_current_csvs(self) -> None:
-        if not all((REPO_ROOT / part).is_dir() for part in ("exp01", "exp02")):
-            self.skipTest("requires the complete EXP-01 and EXP-02 sources")
+        if not all((REPO_ROOT / part).is_dir() for part in ("exp01", "exp02", "exp04")):
+            self.skipTest("requires the complete EXP-01 to EXP-04 sources")
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             shutil.copyfile(REPO_ROOT / "run_all.py", root / "run_all.py")
-            for directory in ("exp01", "exp02", "exp03"):
+            for directory in ("exp01", "exp02", "exp03", "exp04"):
                 shutil.copytree(REPO_ROOT / directory, root / directory,
                                 ignore=shutil.ignore_patterns("__pycache__"))
             command = [sys.executable, "run_all.py"]
@@ -544,11 +550,11 @@ class TestBatchEntry(unittest.TestCase):
                                    timeout=60)
             self.assertEqual(first.returncode, 0, first.stderr)
             self.assertEqual(first.stdout.strip().splitlines()[-3:],
-                             ["passed: 3", "skipped: 0", "failed: 0"])
+                             ["passed: 4", "skipped: 0", "failed: 0"])
             filenames = {path.name for path in (root / "results").rglob("*.png")}
             self.assertEqual(filenames, {"exp01_readout_sequence.png", "exp01_enclosure_widths.png",
                                          "exp02_readout_sequence.png", "exp01_exp02_readouts.png",
-                                         "exp03_cofinal_invariance.png"})
+                                         "exp03_cofinal_invariance.png", "exp04_count_robustness.png"})
 
             # Retain the previous Pell CSV, then make the new calculation fail.
             comparison = root / "results" / "exp02" / "figures" / "exp01_exp02_readouts.png"

@@ -31,6 +31,12 @@ EXPERIMENTS: list[tuple[str, Path, list[str]]] = [
         ["--max-index", "10", "--precision", "2", "--precision", "10",
          "--precision", "100", "--output-dir", "results/exp03"],
     ),
+    (
+        "EXP-04",
+        REPO_ROOT / "exp04" / "exp04_count_robustness.py",
+        ["--max-index", "30", "--precision", "2", "--precision", "10",
+         "--precision", "100", "--output-dir", "results/exp04"],
+    ),
 ]
 
 PLOTS: dict[str, tuple[Path, list[str]]] = {
@@ -42,6 +48,7 @@ PLOTS: dict[str, tuple[Path, list[str]]] = {
     ),
     "EXP-02": (REPO_ROOT / "exp02" / "plot_exp02.py", []),
     "EXP-03": (REPO_ROOT / "exp03" / "plot_exp03.py", []),
+    "EXP-04": (REPO_ROOT / "exp04" / "plot_exp04.py", []),
 }
 
 
