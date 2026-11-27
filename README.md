@@ -11,7 +11,7 @@ py -m pip install -r requirements-plot.txt
 py .\run_all.py
 ```
 
-批量入口按顺序完成 EXP-01 至 EXP-04 的计算和绘图，生成 4 份报告、12 份 CSV 和 6 张 PNG。各实验的输出在 `results/exp01/` 至 `results/exp04/`，图在各自的 `figures/` 中。Pell 与振荡线程的并列图位于 `results/exp02/figures/exp01_exp02_readouts.png`。`results/` 是本地生成目录，已由 Git 忽略。
+批量入口按顺序完成 EXP-01 至 EXP-05 的计算和绘图，生成 5 份报告、14 份 CSV 和 7 张 PNG。各实验的输出在 `results/exp01/` 至 `results/exp05/`，图在各自的 `figures/` 中。Pell 与振荡线程的并列图位于 `results/exp02/figures/exp01_exp02_readouts.png`。`results/` 是本地生成目录，已由 Git 忽略。
 
 只生成报告和 CSV 时可用 `py .\run_all.py --no-plots`，此时所需依赖均来自 Python 标准库。Linux 或 macOS 可使用 `python3 run_all.py`。
 
@@ -23,7 +23,7 @@ py .\run_all.py
 | EXP-02 | [振荡反例与 RCS-4 独立性](exp02/README.md) | 已实现 |
 | EXP-03 | [共尾细化不变性及非共尾对照](exp03/README.md) | 已实现 |
 | EXP-04 | [有限计数扰动鲁棒性](exp04/README.md) | 已实现 |
-| EXP-05 | 嵌套有理包络证书 | 待实现 |
+| EXP-05 | [嵌套有理包络证书](exp05/README.md) | 已实现 |
 | EXP-06 | 准入谱非唯一性 | 待实现 |
 | EXP-07 | 去掉有界性后的反例 | 待实现 |
 | EXP-08 | 区间缩宽但任意选值不稳定 | 待实现 |
@@ -34,9 +34,19 @@ EXP-01 至 EXP-09 为发布承诺。EXP-10 验收通过后随 v1.2 发布。
 
 ## 验收
 
-完整批跑应显示 `passed: 4`、`skipped: 0`、`failed: 0`。单元测试用 `py -m unittest discover -s tests -v` 执行。计算报告的 L3 给出全尾部解析证书，PNG 用于展示有限前缀。已在 Linux、Python 3.12.14、Matplotlib 3.10.8 下从空结果目录验证批跑。
+完整批跑应显示 `passed: 5`、`skipped: 0`、`failed: 0`。单元测试用 `py -m unittest discover -s tests -v` 执行。共用入口的集成测试集中在 `tests/test_run_all.py`，包括只安装部分实验、禁用绘图依赖和计算失败后的绘图行为。计算报告的 L3 给出全尾部解析证书，PNG 用于展示有限前缀。
 
-批跑失败时，以本次退出码和汇总为准。结果目录可能仍有上一次生成的文件。验收产物数量时，可从空的 `results/` 目录运行。
+本整合版以 `EXPERIMENTS_01-04(1).zip` 的源码为基线。该基线包含支持 `--exp01-csv` 的 `exp02/plot_exp02.py`。EXP03 基线包含 `exact_tail_diameter` 和 `constant_stability_certificate`。如果本地 EXP02 目录只有 `plot_readout_pair.py`，或 EXP03 缺少上述函数，应先核对源码版本。
+
+2026-11-27 的 v4 验收使用 Linux、Python 3.12.14 和 Matplotlib 3.10.8。各命令在独立目录中运行。
+
+| 命令 | 实测结果 |
+| --- | --- |
+| `python3 run_all.py` | 5 项通过，生成 5 份报告、14 份 CSV、7 张 PNG |
+| `python3 -S run_all.py --no-plots` | 5 项通过，生成 5 份报告、14 份 CSV |
+| `python3 -m unittest discover -s tests -v` | 133 项测试通过 |
+
+批跑失败时，以本次退出码和汇总为准。启用绘图时，若本次 EXP01 计算失败而 EXP02 计算成功，批跑仍会生成 EXP02 的独立读数图，并跳过 EXP01／02 比较图。结果目录中可能仍有上一次的同名比较图。验收产物数量时，可从空的 `results/` 目录运行。
 
 ## 归档待办
 

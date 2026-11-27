@@ -475,55 +475,5 @@ class TestPlotInput(unittest.TestCase):
         self.assertTrue((self.figures / plot_exp04.FIGURE_NAME).is_file())
 
 
-class TestBatchPlotOrdering(unittest.TestCase):
-    def test_no_plots_runs_exp04_with_only_the_standard_library(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
-            script_dir = root / "exp04"
-            script_dir.mkdir()
-            shutil.copyfile(REPO_ROOT / "run_all.py", root / "run_all.py")
-            shutil.copyfile(core.__file__, script_dir / Path(core.__file__).name)
-            result = subprocess.run([sys.executable, "-S", "run_all.py", "--no-plots"],
-                                    cwd=root, capture_output=True, encoding="utf-8", timeout=30)
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertEqual(result.stdout.strip().splitlines()[-3:],
-                             ["passed: 1", "skipped: 3", "failed: 0"])
-            output = root / "results" / "exp04"
-            self.assertEqual({p.name for p in output.iterdir()},
-                             {"exp04_report.txt", "count_stages.csv", "pell_intervals.csv",
-                              "count_certificates.csv"})
-
-    @unittest.skipUnless(find_spec("matplotlib"), "optional matplotlib dependency")
-    def test_exp04_plot_runs_only_after_successful_current_calculation(self) -> None:
-        import run_all
-
-        with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
-            (root / "exp04").mkdir()
-            shutil.copyfile(REPO_ROOT / "run_all.py", root / "run_all.py")
-            calculation = root / "exp04" / Path(core.__file__).name
-            shutil.copyfile(core.__file__, calculation)
-            shutil.copyfile(plot_exp04.__file__, root / "exp04" / Path(plot_exp04.__file__).name)
-            command = [sys.executable, "run_all.py"]
-            first = subprocess.run(command, cwd=root, capture_output=True, encoding="utf-8",
-                                   timeout=60)
-            self.assertEqual(first.returncode, 0, first.stderr)
-            self.assertIn("[PASS] EXP-04", first.stdout)
-            self.assertEqual(first.stdout.strip().splitlines()[-3:],
-                             ["passed: 1", "skipped: 3", "failed: 0"])
-            figure = root / "results" / "exp04" / "figures" / "exp04_count_robustness.png"
-            self.assertTrue(figure.is_file())
-
-            previous_figure = figure.read_bytes()
-            calculation.write_text("raise SystemExit(1)\n", encoding="utf-8")
-            second = subprocess.run(command, cwd=root, capture_output=True, encoding="utf-8",
-                                    timeout=60)
-            self.assertEqual(second.returncode, 1)
-            self.assertIn("[FAIL] EXP-04", second.stdout)
-            self.assertNotIn("EXP-04 plotting", second.stdout)
-            self.assertEqual(figure.read_bytes(), previous_figure)
-            self.assertEqual(run_all.EXPERIMENTS[-1][0], "EXP-04")
-
-
 if __name__ == "__main__":
     unittest.main(verbosity=2)
