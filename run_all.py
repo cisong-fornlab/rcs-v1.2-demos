@@ -56,6 +56,13 @@ EXPERIMENTS: list[tuple[str, Path, list[str]]] = [
          "--precision", "100", "--witness-index", "0",
          "--output-dir", "results/exp07"],
     ),
+    (
+        "EXP-08",
+        REPO_ROOT / "exp08" / "exp08_shrinking_unstable.py",
+        ["--max-index", "10", "--precision", "2", "--precision", "10",
+         "--precision", "100", "--witness-index", "0",
+         "--output-dir", "results/exp08"],
+    ),
 ]
 
 PLOTS: dict[str, tuple[Path, list[str]]] = {
@@ -78,6 +85,11 @@ PLOTS: dict[str, tuple[Path, list[str]]] = {
         REPO_ROOT / "exp07" / "plot_exp07.py",
         ["--stage-csv", "results/exp07/unbounded_stages.csv",
          "--output-dir", "results/exp07/figures"],
+    ),
+    "EXP-08": (
+        REPO_ROOT / "exp08" / "plot_exp08.py",
+        ["--stage-csv", "results/exp08/shrinking_stages.csv",
+         "--output-dir", "results/exp08/figures"],
     ),
 }
 

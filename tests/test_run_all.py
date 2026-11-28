@@ -25,10 +25,10 @@ def copy_experiment_file(source: Path, target: Path) -> None:
 
 
 class TestBatchEntry(unittest.TestCase):
-    def test_run_all_registers_exp07_and_preserves_earlier_entries(self) -> None:
+    def test_run_all_registers_exp08_and_preserves_earlier_entries(self) -> None:
         labels = [label for label, _, _ in run_all.EXPERIMENTS]
         self.assertEqual(labels, ["EXP-01", "EXP-02", "EXP-03", "EXP-04", "EXP-05", "EXP-06",
-                                  "EXP-07"])
+                                  "EXP-07", "EXP-08"])
         exp01 = run_all.EXPERIMENTS[0]
         self.assertEqual(exp01[1], run_all.REPO_ROOT / "exp01" / "exp01_pell_stability.py")
         self.assertEqual(exp01[2], ["--max-index", "30", "--precision", "2",
@@ -74,6 +74,17 @@ class TestBatchEntry(unittest.TestCase):
             ["--stage-csv", "results/exp07/unbounded_stages.csv",
              "--output-dir", "results/exp07/figures"],
         ))
+        exp08 = run_all.EXPERIMENTS[7]
+        self.assertEqual(exp08[0], "EXP-08")
+        self.assertEqual(exp08[1], run_all.REPO_ROOT / "exp08" / "exp08_shrinking_unstable.py")
+        self.assertEqual(exp08[2], ["--max-index", "10", "--precision", "2",
+                                    "--precision", "10", "--precision", "100",
+                                    "--witness-index", "0", "--output-dir", "results/exp08"])
+        self.assertEqual(run_all.PLOTS["EXP-08"], (
+            run_all.REPO_ROOT / "exp08" / "plot_exp08.py",
+            ["--stage-csv", "results/exp08/shrinking_stages.csv",
+             "--output-dir", "results/exp08/figures"],
+        ))
 
     def test_batch_runs_exp03_and_skips_absent_experiments(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -91,15 +102,16 @@ class TestBatchEntry(unittest.TestCase):
             self.assertIn("[SKIP] EXP-05", result.stdout)
             self.assertIn("[SKIP] EXP-06", result.stdout)
             self.assertIn("[SKIP] EXP-07", result.stdout)
+            self.assertIn("[SKIP] EXP-08", result.stdout)
             self.assertIn("[PASS] EXP-03", result.stdout)
             self.assertEqual(result.stdout.strip().splitlines()[-3:],
-                             ["passed: 1", "skipped: 6", "failed: 0"])
+                             ["passed: 1", "skipped: 7", "failed: 0"])
             self.assertTrue((root / "results" / "exp03" / "exp03_report.txt").is_file())
             self.assertFalse((root / "results" / "exp03" / "figures").exists())
 
     @unittest.skipUnless(find_spec("matplotlib"), "optional matplotlib dependency")
     def test_default_batch_generates_all_figures_from_current_csvs(self) -> None:
-        experiment_dirs = ("exp01", "exp02", "exp03", "exp04", "exp05", "exp06", "exp07")
+        experiment_dirs = ("exp01", "exp02", "exp03", "exp04", "exp05", "exp06", "exp07", "exp08")
         scripts = [script for _, script, _ in run_all.EXPERIMENTS]
         scripts.extend(script for script, _ in run_all.PLOTS.values())
         missing = [path.relative_to(REPO_ROOT).as_posix() for path in scripts
@@ -117,14 +129,19 @@ class TestBatchEntry(unittest.TestCase):
                                    timeout=60)
             self.assertEqual(first.returncode, 0, first.stderr)
             self.assertEqual(first.stdout.strip().splitlines()[-3:],
-                             ["passed: 7", "skipped: 0", "failed: 0"])
-            filenames = {path.name for path in (root / "results").rglob("*.png")}
+                             ["passed: 8", "skipped: 0", "failed: 0"])
+            results = root / "results"
+            self.assertEqual(len(list(results.rglob("*_report.txt"))), 8)
+            self.assertEqual(len(list(results.rglob("*.csv"))), 23)
+            filenames = {path.name for path in results.rglob("*.png")}
+            self.assertEqual(len(filenames), 10)
             self.assertEqual(filenames, {"exp01_readout_sequence.png", "exp01_enclosure_widths.png",
                                          "exp02_readout_sequence.png", "exp01_exp02_readouts.png",
                                          "exp03_cofinal_invariance.png", "exp04_count_robustness.png",
                                          "exp05_nested_enclosures.png",
                                          "exp06_spectrum_nonuniqueness.png",
-                                         "exp07_unbounded_ratio.png"})
+                                         "exp07_unbounded_ratio.png",
+                                         "exp08_shrinking_unstable.png"})
 
             # Retain the previous Pell CSV, then make the new calculation fail.
             comparison = root / "results" / "exp02" / "figures" / "exp01_exp02_readouts.png"
@@ -156,7 +173,7 @@ class TestExp04BatchIntegration(unittest.TestCase):
                                     cwd=root, capture_output=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(result.stdout.strip().splitlines()[-3:],
-                             ["passed: 1", "skipped: 6", "failed: 0"])
+                             ["passed: 1", "skipped: 7", "failed: 0"])
             output = root / "results" / "exp04"
             self.assertEqual({p.name for p in output.iterdir()},
                              {"exp04_report.txt", "count_stages.csv", "pell_intervals.csv",
@@ -178,7 +195,7 @@ class TestExp04BatchIntegration(unittest.TestCase):
             self.assertEqual(first.returncode, 0, first.stderr)
             self.assertIn("[PASS] EXP-04", first.stdout)
             self.assertEqual(first.stdout.strip().splitlines()[-3:],
-                             ["passed: 1", "skipped: 6", "failed: 0"])
+                             ["passed: 1", "skipped: 7", "failed: 0"])
             figure = root / "results" / "exp04" / "figures" / "exp04_count_robustness.png"
             self.assertTrue(figure.is_file())
 
@@ -204,7 +221,7 @@ class TestExp06BatchIntegration(unittest.TestCase):
                                     cwd=root, capture_output=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(result.stdout.strip().splitlines()[-3:],
-                             ["passed: 1", "skipped: 6", "failed: 0"])
+                             ["passed: 1", "skipped: 7", "failed: 0"])
             output = root / "results" / "exp06"
             self.assertEqual({p.name for p in output.iterdir()}, {
                 "exp06_report.txt", "protocol_stages.csv", "pell_intervals.csv",
@@ -229,7 +246,7 @@ class TestExp06BatchIntegration(unittest.TestCase):
             self.assertEqual(first.returncode, 0, first.stderr)
             self.assertIn("[RUN]  EXP-06 plotting", first.stdout)
             self.assertEqual(first.stdout.strip().splitlines()[-3:],
-                             ["passed: 1", "skipped: 6", "failed: 0"])
+                             ["passed: 1", "skipped: 7", "failed: 0"])
             output = root / "results" / "exp06"
             spectrum = output / "spectrum_members.csv"
             figure = output / "figures" / "exp06_spectrum_nonuniqueness.png"
@@ -263,7 +280,7 @@ class TestExp07BatchIntegration(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("[PASS] EXP-07", result.stdout)
             self.assertEqual(result.stdout.strip().splitlines()[-3:],
-                             ["passed: 1", "skipped: 6", "failed: 0"])
+                             ["passed: 1", "skipped: 7", "failed: 0"])
             output = root / "results" / "exp07"
             self.assertEqual({p.name for p in output.iterdir()}, {
                 "exp07_report.txt", "unbounded_stages.csv", "unbounded_certificates.csv",
@@ -286,7 +303,7 @@ class TestExp07BatchIntegration(unittest.TestCase):
             self.assertEqual(first.returncode, 0, first.stderr)
             self.assertIn("[RUN]  EXP-07 plotting", first.stdout)
             self.assertEqual(first.stdout.strip().splitlines()[-3:],
-                             ["passed: 1", "skipped: 6", "failed: 0"])
+                             ["passed: 1", "skipped: 7", "failed: 0"])
             output = root / "results" / "exp07"
             stage_csv = output / "unbounded_stages.csv"
             figure = output / "figures" / "exp07_unbounded_ratio.png"
@@ -305,8 +322,68 @@ class TestExp07BatchIntegration(unittest.TestCase):
             self.assertEqual(stage_csv.read_bytes(), previous_csv)
             self.assertEqual(figure.read_bytes(), previous_figure)
             self.assertEqual(second.stdout.strip().splitlines()[-4:],
-                             ["passed: 0", "skipped: 6", "failed: 1",
+                             ["passed: 0", "skipped: 7", "failed: 1",
                               "failed experiments: EXP-07"])
+
+
+class TestExp08BatchIntegration(unittest.TestCase):
+    def test_no_plots_runs_exp08_with_only_the_standard_library(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            script_dir = root / "exp08"
+            script_dir.mkdir()
+            shutil.copyfile(REPO_ROOT / "run_all.py", root / "run_all.py")
+            calculation = REPO_ROOT / "exp08" / "exp08_shrinking_unstable.py"
+            copy_experiment_file(calculation, script_dir / calculation.name)
+            result = subprocess.run([sys.executable, "-S", "run_all.py", "--no-plots"],
+                                    cwd=root, capture_output=True, encoding="utf-8", timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("[PASS] EXP-08", result.stdout)
+            self.assertEqual(result.stdout.strip().splitlines()[-3:],
+                             ["passed: 1", "skipped: 7", "failed: 0"])
+            output = root / "results" / "exp08"
+            self.assertEqual({p.name for p in output.iterdir()}, {
+                "exp08_report.txt", "shrinking_stages.csv", "shrinking_certificates.csv",
+            })
+            self.assertFalse((output / "figures").exists())
+
+    @unittest.skipUnless(find_spec("matplotlib"), "optional matplotlib dependency")
+    def test_exp08_plot_runs_only_after_successful_current_calculation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "exp08").mkdir()
+            shutil.copyfile(REPO_ROOT / "run_all.py", root / "run_all.py")
+            calculation = root / "exp08" / "exp08_shrinking_unstable.py"
+            copy_experiment_file(REPO_ROOT / "exp08" / calculation.name, calculation)
+            plot = root / "exp08" / "plot_exp08.py"
+            copy_experiment_file(REPO_ROOT / "exp08" / plot.name, plot)
+            command = [sys.executable, "run_all.py"]
+            first = subprocess.run(command, cwd=root, capture_output=True, encoding="utf-8",
+                                   timeout=60)
+            self.assertEqual(first.returncode, 0, first.stderr)
+            self.assertIn("[RUN]  EXP-08 plotting", first.stdout)
+            self.assertEqual(first.stdout.strip().splitlines()[-3:],
+                             ["passed: 1", "skipped: 7", "failed: 0"])
+            output = root / "results" / "exp08"
+            stage_csv = output / "shrinking_stages.csv"
+            figure = output / "figures" / "exp08_shrinking_unstable.png"
+            self.assertTrue(stage_csv.is_file())
+            self.assertTrue(figure.is_file())
+
+            # Stale CSV and PNG files must not trigger plotting after a new failure.
+            previous_csv = stage_csv.read_bytes()
+            previous_figure = figure.read_bytes()
+            calculation.write_text("raise SystemExit(1)\n", encoding="utf-8")
+            second = subprocess.run(command, cwd=root, capture_output=True, encoding="utf-8",
+                                    timeout=60)
+            self.assertEqual(second.returncode, 1)
+            self.assertIn("[FAIL] EXP-08", second.stdout)
+            self.assertNotIn("EXP-08 plotting", second.stdout)
+            self.assertEqual(stage_csv.read_bytes(), previous_csv)
+            self.assertEqual(figure.read_bytes(), previous_figure)
+            self.assertEqual(second.stdout.strip().splitlines()[-4:],
+                             ["passed: 0", "skipped: 7", "failed: 1",
+                              "failed experiments: EXP-08"])
 
 
 if __name__ == "__main__":
