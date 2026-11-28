@@ -49,6 +49,13 @@ EXPERIMENTS: list[tuple[str, Path, list[str]]] = [
         ["--max-index", "30", "--precision", "2", "--precision", "10",
          "--precision", "100", "--output-dir", "results/exp06"],
     ),
+    (
+        "EXP-07",
+        REPO_ROOT / "exp07" / "exp07_unbounded_ratio.py",
+        ["--max-index", "10", "--precision", "2", "--precision", "10",
+         "--precision", "100", "--witness-index", "0",
+         "--output-dir", "results/exp07"],
+    ),
 ]
 
 PLOTS: dict[str, tuple[Path, list[str]]] = {
@@ -66,6 +73,11 @@ PLOTS: dict[str, tuple[Path, list[str]]] = {
         REPO_ROOT / "exp06" / "plot_exp06.py",
         ["--spectrum-csv", "results/exp06/spectrum_members.csv",
          "--output-dir", "results/exp06/figures"],
+    ),
+    "EXP-07": (
+        REPO_ROOT / "exp07" / "plot_exp07.py",
+        ["--stage-csv", "results/exp07/unbounded_stages.csv",
+         "--output-dir", "results/exp07/figures"],
     ),
 }
 
