@@ -43,6 +43,12 @@ EXPERIMENTS: list[tuple[str, Path, list[str]]] = [
         ["--max-index", "10", "--precision", "2", "--precision", "10",
          "--precision", "100", "--output-dir", "results/exp05"],
     ),
+    (
+        "EXP-06",
+        REPO_ROOT / "exp06" / "exp06_spectrum_nonuniqueness.py",
+        ["--max-index", "30", "--precision", "2", "--precision", "10",
+         "--precision", "100", "--output-dir", "results/exp06"],
+    ),
 ]
 
 PLOTS: dict[str, tuple[Path, list[str]]] = {
@@ -56,6 +62,11 @@ PLOTS: dict[str, tuple[Path, list[str]]] = {
     "EXP-03": (REPO_ROOT / "exp03" / "plot_exp03.py", []),
     "EXP-04": (REPO_ROOT / "exp04" / "plot_exp04.py", []),
     "EXP-05": (REPO_ROOT / "exp05" / "plot_exp05.py", []),
+    "EXP-06": (
+        REPO_ROOT / "exp06" / "plot_exp06.py",
+        ["--spectrum-csv", "results/exp06/spectrum_members.csv",
+         "--output-dir", "results/exp06/figures"],
+    ),
 }
 
 
